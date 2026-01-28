@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARENA LIVE 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gun/0.2020.1239/gun.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        body { margin: 0; background: #0a0a0a; color: #eee; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        #login { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .box-login { background: #1a1a1a; padding: 40px; border-radius: 20px; border: 2px solid #ff0055; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 85, 0.3); }
+        #col-sx { width: 220px; border-right: 1px solid #333; padding: 15px; background: #111; display: flex; flex-direction: column; }
+        #col-main { flex: 1; display: flex; flex-direction: column; background: #050505; }
+        #col-dx { width: 320px; border-left: 1px solid #333; padding: 15px; background: #111; overflow-y: auto; }
+        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 8px; background: #222; border-left: 4px solid #ff0055; }
+        .video-box { background: #000; border: 2px solid #444; border-radius: 12px; position: relative; height: 180px; margin-bottom: 15px; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .name-tag { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 3px 10px; border-radius: 5px; font-size: 12px; color: gold; }
+        input { background: #222; color: #fff; border: 1px solid #444; padding: 12px; border-radius: 8px; width: calc(100% - 24px); outline: none; }
+        button { background: #ff0055; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #ff4081; }
+        .u-item { padding: 8px; margin: 5px 0; background: #1a1a1a; border-radius: 5px; color: #00d4ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="login">
+    <div class="box-login">
+        <h1 style="color:#ff0055; margin-bottom: 25px;">ARENA LIVE</h1>
+        <input type="text" id="nick" placeholder="Tuo Nome..."><br><br>
+        <button onclick="entra()">ENTRA ORA</button>
+    </div>
+</div>
+
+<div id="col-sx">
+    <div id="quiz-area" style="background:#ff005522; border:1px solid #ff0055; padding:15px; border-radius:10px; text-align:center; font-weight:bold; color:#ff0055;">
+        In attesa di quiz...
+    </div>
+    <h4 style="color:gold; margin-top:40px; border-bottom: 1px solid #333; padding-bottom:10px;">ONLINE</h4>
+    <div id="u-list"></div>
+</div>
+
+<div id="col-main">
+    <div id="chat"></div>
+    <div style="padding:15px; background: #111; display: flex; gap: 8px;">
+        <input type="text" id="m-in" placeholder="Invia un messaggio..." onkeypress="if(event.key==='Enter') invia()">
+        <button onclick="invia()">INVIA</button>
+    </div>
+</div>
+
+<div id="col-dx">
+    <button onclick="toggleCam()" id="camBtn" style="background: #4CAF50; width: 100%; margin-bottom: 20px;">🎥 ATTIVA WEBCAM</button>
+    <div id="videos"></div>
+</div>
+
+<script>
+    let mioNick = ""; let mioStream; let peer;
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+    const db = gun.get('arena_pro_2026_top');
+
+    function entra() {
+        mioNick = document.getElementById('nick').value.trim();
+        if(!mioNick) return alert("Scegli un nome!");
+        document.getElementById('login').style.display = 'none';
+        peer = new Peer(mioNick);
+        db.get('u').get(mioNick).put({nome: mioNick, online: true});
+        peer.on('call', call => {
+            call.answer(mioStream);
+            call.on('stream', s => createVideo(call.peer, s));
+        });
+    }
+
+    db.get('u').map().on((d, id) => {
+        if(d && d.nome && !document.getElementById('ut-'+id)) {
+            let div = document.createElement('div');
+            div.id = 'ut-'+id; div.className = 'u-item';
+            div.innerText = "● " + d.nome;
+            document.getElementById('u-list').appendChild(div);
+        }
+    });
+
+    function invia() {
+        let m = document.getElementById('m-in').value;
+        if(m) { db.get('msg').set({u: mioNick, m: m}); document.getElementById('m-in').value = ""; }
+    }
+    db.get('msg').map().once(d => {
+        if(d && d.m) {
+            let div = document.createElement('div');
+            div.className = 'msg';
+            div.innerHTML = `<b style="color:#ff0055">${d.u}:</b> ${d.m}`;
+            document.getElementById('chat').appendChild(div);
+            document.getElementById('chat').scrollTop = 99999;
+        }
+    });
+
+    async function toggleCam() {
+        if(!mioStream) {
+            try {
+                mioStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+                createVideo(mioNick, mioStream, true);
+                db.get('u').map().once((d, id) => {
+                    if(id !== mioNick) peer.call(id, mioStream).on('stream', s => createVideo(id, s));
+                });
+                document.getElementById('camBtn').innerText = "🔴 SPEGNI";
+            } catch(e) { alert("Attiva la cam!"); }
+        } else { location.reload(); }
+    }
+
+    function createVideo(id, stream, isMe = false) {
+        if(document.getElementById('vid-'+id)) return;
+        let box = document.createElement('div'); box.id = 'vid-'+id; box.className = 'video-box';
+        let v = document.createElement('video'); v.srcObject = stream; v.autoplay = true; v.playsInline = true;
+        if(isMe) v.muted = true;
+        let tag = document.createElement('div'); tag.className = 'name-tag'; tag.innerText = id + (isMe ? " (Tu)" : "");
+        box.append(v, tag); document.getElementById('videos').appendChild(box);
+    }
+</script>
+</body>
+</html>
