@@ -3,118 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARENA LIVE 2026</title>
+    <title>ARENA PRO 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gun/0.2020.1239/gun.min.js"></script>
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        body { margin: 0; background: #0a0a0a; color: #eee; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; }
-        #login { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .box-login { background: #1a1a1a; padding: 40px; border-radius: 20px; border: 2px solid #ff0055; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 85, 0.3); }
-        #col-sx { width: 220px; border-right: 1px solid #333; padding: 15px; background: #111; display: flex; flex-direction: column; }
-        #col-main { flex: 1; display: flex; flex-direction: column; background: #050505; }
-        #col-dx { width: 320px; border-left: 1px solid #333; padding: 15px; background: #111; overflow-y: auto; }
-        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px; border-radius: 8px; background: #222; border-left: 4px solid #ff0055; }
-        .video-box { background: #000; border: 2px solid #444; border-radius: 12px; position: relative; height: 180px; margin-bottom: 15px; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        .name-tag { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 3px 10px; border-radius: 5px; font-size: 12px; color: gold; }
-        input { background: #222; color: #fff; border: 1px solid #444; padding: 12px; border-radius: 8px; width: calc(100% - 24px); outline: none; }
-        button { background: #ff0055; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #ff4081; }
-        .u-item { padding: 8px; margin: 5px 0; background: #1a1a1a; border-radius: 5px; color: #00d4ff; font-weight: bold; }
+        body { margin: 0; background: #050505; color: #eee; font-family: 'Inter', sans-serif; display: flex; height: 100vh; }
+        #login { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .box-login { background: #111; padding: 40px; border: 2px solid #00f2ff; border-radius: 20px; text-align: center; }
+        #sx { width: 250px; border-right: 1px solid #222; background: #0a0a0a; display: flex; flex-direction: column; }
+        #main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        #dx { width: 350px; border-left: 1px solid #222; background: #0a0a0a; padding: 10px; }
+        #yt-player { width: 100%; height: 250px; background: #000; }
+        #chat { flex: 1; overflow-y: auto; padding: 20px; background: rgba(255,255,255,0.02); }
+        .msg { margin-bottom: 10px; padding: 8px; border-radius: 5px; background: #1a1a1a; border-left: 3px solid #00f2ff; }
+        .privato { border-left-color: #ff00ff !important; background: #221122 !important; }
+        .u-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #111; color: #00f2ff; }
+        .u-item:hover { background: #111; }
+        input { background: #111; color: #fff; border: 1px solid #333; padding: 12px; border-radius: 8px; width: 80%; }
+        button { background: #00f2ff; color: #000; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #game-area { height: 100px; background: #111; border-top: 1px dashed #333; padding: 10px; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
 <div id="login">
     <div class="box-login">
-        <h1 style="color:#ff0055; margin-bottom: 25px;">ARENA LIVE</h1>
-        <input type="text" id="nick" placeholder="Tuo Nome..."><br><br>
-        <button onclick="entra()">ENTRA ORA</button>
+        <h1 style="color:#00f2ff">ARENA PRO</h1>
+        <input type="text" id="nick" placeholder="Tuo Nickname..."><br><br>
+        <button onclick="inizia()">ENTRA NELL'ARENA</button>
     </div>
 </div>
 
-<div id="col-sx">
-    <div id="quiz-area" style="background:#ff005522; border:1px solid #ff0055; padding:15px; border-radius:10px; text-align:center; font-weight:bold; color:#ff0055;">
-        In attesa di quiz...
-    </div>
-    <h4 style="color:gold; margin-top:40px; border-bottom: 1px solid #333; padding-bottom:10px;">ONLINE</h4>
+<div id="sx">
+    <h3 style="text-align:center; color:gold;">ONLINE</h3>
     <div id="u-list"></div>
+    <div style="margin-top:auto; padding:10px; font-size:10px; color:#444;">ARENA V.2.0</div>
 </div>
 
-<div id="col-main">
+<div id="main">
+    <div id="yt-player"></div>
     <div id="chat"></div>
-    <div style="padding:15px; background: #111; display: flex; gap: 8px;">
-        <input type="text" id="m-in" placeholder="Invia un messaggio..." onkeypress="if(event.key==='Enter') invia()">
-        <button onclick="invia()">INVIA</button>
+    <div id="game-area">
+        <div id="quiz-txt">Attesa prossimo round...</div>
+    </div>
+    <div style="padding:15px; display:flex; gap:5px;">
+        <input type="text" id="m-in" placeholder="Scrivi a tutti (o clicca un nome per il privato)...">
+        <button onclick="invia()">INV</button>
     </div>
 </div>
 
-<div id="col-dx">
-    <button onclick="toggleCam()" id="camBtn" style="background: #4CAF50; width: 100%; margin-bottom: 20px;">🎥 ATTIVA WEBCAM</button>
+<div id="dx">
+    <button onclick="toggleCam()" style="width:100%; background:#ff0055; color:white; margin-bottom:10px;">🎥 WEBCAM ON/OFF</button>
     <div id="videos"></div>
 </div>
 
 <script>
-    let mioNick = ""; let mioStream; let peer;
+    let mioNick = "";
+    let targetPrivato = null;
     const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
-    const db = gun.get('arena_pro_2026_top');
+    const db = gun.get('arena_globale_2026_pro');
 
-    function entra() {
+    function inizia() {
         mioNick = document.getElementById('nick').value.trim();
-        if(!mioNick) return alert("Scegli un nome!");
+        if(!mioNick) return alert("Metti un nome!");
         document.getElementById('login').style.display = 'none';
-        peer = new Peer(mioNick);
-        db.get('u').get(mioNick).put({nome: mioNick, online: true});
-        peer.on('call', call => {
-            call.answer(mioStream);
-            call.on('stream', s => createVideo(call.peer, s));
-        });
+        db.get('utenti').get(mioNick).put({nome: mioNick, last: Date.now()});
     }
 
-    db.get('u').map().on((d, id) => {
-        if(d && d.nome && !document.getElementById('ut-'+id)) {
-            let div = document.createElement('div');
-            div.id = 'ut-'+id; div.className = 'u-item';
-            div.innerText = "● " + d.nome;
-            document.getElementById('u-list').appendChild(div);
+    // LISTA UTENTI
+    db.get('utenti').map().on((d, id) => {
+        if(!d || !d.nome) return;
+        let el = document.getElementById('u-'+id);
+        if(!el) {
+            el = document.createElement('div'); el.id = 'u-'+id; el.className = 'u-item';
+            el.onclick = () => { targetPrivato = id; document.getElementById('m-in').placeholder = "PRIVATO a " + id; };
+            document.getElementById('u-list').appendChild(el);
         }
+        el.innerText = "● " + d.nome;
     });
 
+    // CHAT E PRIVATA
     function invia() {
-        let m = document.getElementById('m-in').value;
-        if(m) { db.get('msg').set({u: mioNick, m: m}); document.getElementById('m-in').value = ""; }
-    }
-    db.get('msg').map().once(d => {
-        if(d && d.m) {
-            let div = document.createElement('div');
-            div.className = 'msg';
-            div.innerHTML = `<b style="color:#ff0055">${d.u}:</b> ${d.m}`;
-            document.getElementById('chat').appendChild(div);
-            document.getElementById('chat').scrollTop = 99999;
+        let msg = document.getElementById('m-in').value;
+        if(!msg) return;
+        if(targetPrivato) {
+            db.get('priv').get(targetPrivato).get(mioNick).set({da: mioNick, t: msg});
+            targetPrivato = null;
+            document.getElementById('m-in').placeholder = "Invia un messaggio...";
+        } else {
+            db.get('chat').set({u: mioNick, t: msg, tempo: Date.now()});
         }
+        document.getElementById('m-in').value = "";
+    }
+
+    db.get('chat').map().once(d => {
+        if(!d) return;
+        let div = document.createElement('div');
+        div.className = 'msg';
+        div.innerHTML = `<b style="color:#00f2ff">${d.u}:</b> ${d.t}`;
+        document.getElementById('chat').appendChild(div);
+        document.getElementById('chat').scrollTop = 9999;
     });
 
-    async function toggleCam() {
-        if(!mioStream) {
-            try {
-                mioStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
-                createVideo(mioNick, mioStream, true);
-                db.get('u').map().once((d, id) => {
-                    if(id !== mioNick) peer.call(id, mioStream).on('stream', s => createVideo(id, s));
-                });
-                document.getElementById('camBtn').innerText = "🔴 SPEGNI";
-            } catch(e) { alert("Attiva la cam!"); }
-        } else { location.reload(); }
-    }
-
-    function createVideo(id, stream, isMe = false) {
-        if(document.getElementById('vid-'+id)) return;
-        let box = document.createElement('div'); box.id = 'vid-'+id; box.className = 'video-box';
-        let v = document.createElement('video'); v.srcObject = stream; v.autoplay = true; v.playsInline = true;
-        if(isMe) v.muted = true;
-        let tag = document.createElement('div'); tag.className = 'name-tag'; tag.innerText = id + (isMe ? " (Tu)" : "");
-        box.append(v, tag); document.getElementById('videos').appendChild(box);
+    // SISTEMA YOUTUBE (Video di test: Lofi Beats)
+    var player;
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('yt-player', {
+            videoId: 'jfKfPfyJRdk',
+            playerVars: { 'autoplay': 1, 'controls': 1 },
+            events: { 'onReady': (e) => e.target.mute() }
+        });
     }
 </script>
 </body>
