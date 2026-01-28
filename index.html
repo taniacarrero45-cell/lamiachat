@@ -2,113 +2,105 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>ARENA LIVE - OFFICIAL</title>
+    <title>ARENA LIVE - L'ORIGINALE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gun/0.2020.1239/gun.min.js"></script>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: 'Arial', sans-serif; display: flex; height: 100vh; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; }
         
-        /* Pannello Utenti */
-        #utenti-side { width: 220px; background: #080808; border-right: 1px solid #333; display: flex; flex-direction: column; }
-        .titolo-side { padding: 20px; color: #ff00ff; font-weight: bold; border-bottom: 1px solid #222; text-align: center; }
-        #lista-u { flex: 1; overflow-y: auto; padding: 10px; }
-        .u-card { padding: 10px; color: #00f2ff; border-bottom: 1px solid #111; font-size: 14px; }
+        /* Layout */
+        #pannello-utenti { width: 200px; border-right: 2px solid #ff00ff; background: #050505; display: flex; flex-direction: column; }
+        #area-centrale { flex: 1; display: flex; flex-direction: column; }
+        #regia-destra { width: 350px; border-left: 2px solid #00f2ff; background: #050505; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        /* Area Chat Centrale */
-        #chat-area { flex: 1; display: flex; flex-direction: column; background: #000; }
-        #display-msg { flex: 1; overflow-y: auto; padding: 25px; }
-        .messaggio { margin-bottom: 15px; padding: 12px; background: #111; border-radius: 10px; border-left: 4px solid #ff00ff; line-height: 1.4; }
-        .user-name { color: #00f2ff; font-weight: bold; margin-right: 8px; }
-        .input-box { padding: 20px; background: #050505; display: flex; gap: 10px; border-top: 1px solid #222; }
-        input { flex: 1; padding: 15px; background: #111; border: 1px solid #444; color: #fff; border-radius: 8px; outline: none; }
-        input:focus { border-color: #ff00ff; }
-        .btn-send { background: #ff00ff; color: #fff; border: none; padding: 0 25px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        /* Stili */
+        .titolo { padding: 15px; color: #ff00ff; text-align: center; border-bottom: 1px solid #222; font-weight: bold; }
+        #box-chat { flex: 1; overflow-y: auto; padding: 20px; background: #000; }
+        .messaggio { margin-bottom: 12px; padding: 10px; background: #111; border-radius: 10px; border-left: 4px solid #ff00ff; }
+        .input-zona { padding: 20px; background: #0a0a0a; display: flex; gap: 10px; border-top: 1px solid #222; }
+        input { flex: 1; padding: 15px; background: #111; border: 1px solid #444; color: #fff; border-radius: 8px; }
+        button { background: #ff00ff; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* Colonna Destra (Regia) */
-        #regia-side { width: 350px; background: #080808; border-left: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
-        .modulo { background: #111; border-radius: 12px; border: 1px solid #222; overflow: hidden; }
-        .modulo-titolo { padding: 8px; background: #1a1a1a; font-size: 12px; color: #888; text-align: center; text-transform: uppercase; }
-        #yt-player { width: 100%; aspect-ratio: 16/9; border: none; }
-        .game-area { padding: 20px; text-align: center; }
-        .btn-webcam { background: #ff0055; color: #fff; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
-
-        /* Login Overlay */
-        #overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: #111; padding: 40px; border: 2px solid #ff00ff; border-radius: 20px; text-align: center; box-shadow: 0 0 30px #ff00ff33; }
+        /* Media */
+        .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid #333; }
+        .modulo-gioco { background: #111; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #222; }
+        .btn-webcam { background: #00f2ff; color: #000; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+        
+        #overlay-login { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-<div id="overlay">
-    <div class="login-box">
-        <h1 style="color:#ff00ff; margin-bottom: 30px;">ARENA LIVE 2026</h1>
-        <input type="text" id="nick" placeholder="Scegli il tuo Nickname..."><br><br>
-        <button onclick="entra()" class="btn-send" style="height:50px; width:100%;">ENTRA ORA</button>
+<div id="overlay-login">
+    <div style="border: 2px solid #ff00ff; padding: 40px; border-radius: 20px; text-align: center; background: #0a0a0a;">
+        <h1 style="color:#00f2ff">ARENA ACCESSO</h1>
+        <input type="text" id="nickname" placeholder="Nickname..."><br><br>
+        <button onclick="entra()" style="width:100%">ENTRA ORA</button>
     </div>
 </div>
 
-<div id="utenti-side">
-    <div class="titolo-side">UTENTI ONLINE</div>
-    <div id="lista-u"></div>
+<div id="pannello-utenti">
+    <div class="titolo">ONLINE</div>
+    <div id="u-lista" style="padding:10px;"></div>
 </div>
 
-<div id="chat-area">
-    <div id="display-msg"></div>
-    <div class="input-box">
-        <input type="text" id="m-in" placeholder="Scrivi un messaggio pubblico..." onkeypress="if(event.key==='Enter') invia()">
-        <button onclick="invia()" class="btn-send">INVIA</button>
+<div id="area-centrale">
+    <div id="box-chat"></div>
+    <div class="input-zona">
+        <input type="text" id="msg-in" placeholder="Scrivi un messaggio..." onkeypress="if(event.key==='Enter') invia()">
+        <button onclick="invia()">INVIA</button>
     </div>
 </div>
 
-<div id="regia-side">
-    <div class="modulo">
-        <div class="modulo-titolo">YouTube Player</div>
-        <iframe id="yt-player" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
+<div id="regia-destra">
+    <div class="titolo" style="color:#00f2ff">REGIA MEDIA</div>
+    <iframe class="video-player" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
+    
+    <div class="modulo-gioco">
+        <h4 style="margin:0; color:gold">ARENA QUIZ</h4>
+        <p style="font-size:12px; color:#666">Sfida i tuoi amici!</p>
+        <button onclick="alert('Dadi lanciati!')" style="background:#333; color:#fff; width:100%">GIOCA ROUND</button>
     </div>
 
-    <div class="modulo game-area">
-        <div class="modulo-titolo" style="margin-bottom:10px;">Arena Quiz</div>
-        <div style="color: gold; font-size: 20px; margin-bottom: 10px;">🎲</div>
-        <button class="btn-send" style="background:#444; font-size:12px; width:100%" onclick="alert('Lancio dadi...')">GIOCA ROUND</button>
-    </div>
-
-    <button class="btn-webcam" onclick="alert('Permesso Camera...')">🎥 ATTIVA WEBCAM</button>
-    <div id="v-status" style="text-align:center; font-size:11px; color:#444;">Nessun video attivo</div>
+    <button class="btn-webcam" onclick="alert('Attivazione Camera...')">🎥 ATTIVA WEBCAM</button>
 </div>
 
 <script>
     const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
-    const db = gun.get('arena_real_today_2026');
+    const db = gun.get('arena_u_2026_reale');
     let mioNick = "";
 
     function entra() {
-        mioNick = document.getElementById('nick').value.trim();
+        mioNick = document.getElementById('nickname').value.trim();
         if(!mioNick) return;
-        document.getElementById('overlay').style.display = 'none';
-        db.get('u').get(mioNick).put({nome: mioNick, login: Date.now()});
+        document.getElementById('overlay-login').style.display = 'none';
+        db.get('utenti').get(mioNick).put({nome: mioNick});
     }
 
     function invia() {
-        let txt = document.getElementById('m-in').value;
-        if(!txt) return;
-        db.get('m').set({u: mioNick, t: txt, time: Date.now()});
-        document.getElementById('m-in').value = "";
+        let t = document.getElementById('msg-in').value;
+        if(!t) return;
+        db.get('messaggi').set({u: mioNick, t: t});
+        document.getElementById('msg-in').value = "";
     }
 
-    db.get('m').map().once(d => {
+    db.get('messaggi').map().once(d => {
         if(!d) return;
-        let div = document.createElement('div');
-        div.className = 'messaggio';
-        div.innerHTML = `<span class="user-name">${d.u}:</span> <span>${d.t}</span>`;
-        document.getElementById('display-msg').appendChild(div);
-        document.getElementById('display-msg').scrollTop = 99999;
+        let m = document.createElement('div');
+        m.className = 'messaggio';
+        m.innerHTML = `<b style="color:#00f2ff">${d.u}:</b> ${d.t}`;
+        document.getElementById('box-chat').appendChild(m);
+        document.getElementById('box-chat').scrollTop = 9999;
     });
 
-    db.get('u').map().on((d, id) => {
+    db.get('utenti').map().on((d, id) => {
         if(!d || document.getElementById('u-'+id)) return;
-        let el = document.createElement('div');
-        el.id = 'u-'+id; el.className = 'u-card';
-        el.innerText = "● " + id;
-        document.getElementById('lista-u').appendChild(el);
+        let u = document.createElement('div');
+        u.id = 'u-'+id;
+        u.innerText = "● " + id;
+        u.style.padding = "8px";
+        u.style.color = "#00f2ff";
+        document.getElementById('u-lista').appendChild(u);
     });
 </script>
 </body>
